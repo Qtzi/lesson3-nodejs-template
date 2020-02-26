@@ -3,6 +3,7 @@ const Router = require('koa-router');
 const bodyParser = require('koa-bodyparser');
 const logger = require('koa-logger');
 const cors = require('kcors');
+const { Op } = require('sequelize');
 
 const database = require('./database');
 
@@ -19,9 +20,10 @@ app.use(bodyParser());
 /* METHODS TO RESPOND TO THE ROUTES */
 
 const listChats = async (ctx) => {
-  const options = {};
+  const { room } = ctx.query;
+  const options = room ? {room:{[Op.eq]:room}}: {};
 
-  const chats = await database.Chat.findAll(options);
+  const chats = await database.Chat.findAll({where: options});
 
   const response = {
     results: chats,
@@ -29,6 +31,7 @@ const listChats = async (ctx) => {
 
   ctx.body = response;
 };
+
 
 const createChat = async (ctx) => {
   const params = ctx.request.body;
